@@ -3,6 +3,7 @@ import { formatColorName } from '../utils/helpers';
 
 export default function GameStatus() {
   const {
+    board,
     gameStatus,
     winner,
     myColor,
@@ -12,6 +13,20 @@ export default function GameStatus() {
     mustContinueCapture,
     error
   } = useGameStore();
+  
+  const countPieces = (color) => {
+    if (!board || board.length === 0) return 0;
+    
+    let count = 0;
+    for (let row = 0; row < 8; row++) {
+      for (let col = 0; col < 8; col++) {
+        if (board[row]?.[col]?.color === color) {
+          count++;
+        }
+      }
+    }
+    return count;
+  };
 
   if (gameStatus === 'finished') {
     return (
@@ -92,20 +107,5 @@ export default function GameStatus() {
       </div>
     </div>
   );
-}
-
-function countPieces(color) {
-  const board = useGameStore.getState().board;
-  if (!board || board.length === 0) return 0;
-  
-  let count = 0;
-  for (let row = 0; row < 8; row++) {
-    for (let col = 0; col < 8; col++) {
-      if (board[row]?.[col]?.color === color) {
-        count++;
-      }
-    }
-  }
-  return count;
 }
 
