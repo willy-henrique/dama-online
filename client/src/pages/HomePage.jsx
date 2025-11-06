@@ -40,8 +40,8 @@ export default function HomePage({ socket, onCreateRoom, onJoinRoom, onBackToHom
     socket.on('room-joined', ({ roomId, color, nickname }) => {
       console.log('✅ Entrou na sala! Room:', roomId, 'Color:', color);
       setJoinedRoomId(roomId);
-      // Quando alguém entrar na sala, vai para o jogo imediatamente
-      onJoinRoom(roomId, color, nickname);
+      // NÃO vai para o jogo imediatamente - espera o evento game-started
+      // O evento game-started será enviado quando ambos estiverem na sala
     });
 
     socket.on('game-started', (gameState) => {
@@ -50,47 +50,67 @@ export default function HomePage({ socket, onCreateRoom, onJoinRoom, onBackToHom
       console.log('White player ID:', gameState.players.white?.id);
       console.log('Black player ID:', gameState.players.black?.id);
       
-      // Quando o jogo começar (2 jogadores), ambos vão para a página do jogo
-      // Captura os valores antes de limpar o estado
-      const currentCreatedRoomId = createdRoomId;
-      const currentJoinedRoomId = joinedRoomId;
-      const currentRoomId = currentCreatedRoomId || currentJoinedRoomId;
-      const currentNickname = nickname;
+      // Determina a cor do jogador baseado no socket.id
+      const playerColor = gameState.players.white?.id === socket.id ? 'white' : 
+                         gameState.players.black?.id === socket.id ? 'black' : null;
       
-      console.log('📋 Room IDs:', { createdRoomId: currentCreatedRoomId, joinedRoomId: currentJoinedRoomId, currentRoomId });
+      console.log('🎯 Cor do jogador detectada:', playerColor);
       
-      if (currentRoomId) {
-        // Determina a cor do jogador baseado no socket.id
-        const playerColor = gameState.players.white?.id === socket.id ? 'white' : 
-                           gameState.players.black?.id === socket.id ? 'black' : null;
-        
-        console.log('🎯 Cor do jogador detectada:', playerColor);
-        
-        if (playerColor) {
-          // Limpa o estado da sala criada para forçar a transição
-          setCreatedRoomId(null);
-          setJoinedRoomId(null);
-          setMode(null);
-          
-          // Usa setTimeout para garantir que o estado seja limpo antes da transição
-          setTimeout(() => {
-            if (currentCreatedRoomId) {
-              // Jogador que criou a sala - vai para o jogo
-              console.log('🚀 Criador da sala indo para o jogo...', currentRoomId);
-              onCreateRoom(currentRoomId);
-            } else if (currentJoinedRoomId) {
-              // Jogador que entrou na sala - vai para o jogo
-              console.log('🚀 Jogador que entrou indo para o jogo...', currentRoomId, playerColor);
-              onJoinRoom(currentRoomId, playerColor, currentNickname);
-            }
-          }, 100);
-        } else {
-          console.error('❌ Não foi possível identificar a cor do jogador');
-          console.error('Estado do jogo:', gameState);
-        }
-      } else {
-        console.error('❌ Nenhum roomId encontrado!');
+      if (!playerColor) {
+        console.error('❌ Não foi possível identificar a cor do jogador');
+        console.error('Estado do jogo:', gameState);
+        return;
       }
+      
+      // Usa uma função para acessar os valores atuais do estado
+      setCreatedRoomId((prevCreatedRoomId) => {
+        setJoinedRoomId((prevJoinedRoomId) => {
+          const currentRoomId = prevCreatedRoomId || prevJoinedRoomId;
+          const currentNickname = nickname;
+          
+          console.log('📋 Room IDs:', { 
+            createdRoomId: prevCreatedRoomId, 
+            joinedRoomId: prevJoinedRoomId, 
+            currentRoomId 
+          });
+          
+          if (currentRoomId) {
+            // Limpa o estado da sala criada para forçar a transição
+            setTimeout(() => {
+              if (prevCreatedRoomId) {
+                // Jogador que criou a sala - vai para o jogo
+                console.log('🚀 Criador da sala indo para o jogo...', currentRoomId);
+                onCreateRoom(currentRoomId);
+              } else if (prevJoinedRoomId) {
+                // Jogador que entrou na sala - vai para o jogo
+                console.log('🚀 Jogador que entrou indo para o jogo...', currentRoomId, playerColor);
+                onJoinRoom(currentRoomId, playerColor, currentNickname);
+              }
+            }, 50);
+            
+            return null; // Limpa joinedRoomId
+          } else {
+            console.error('❌ Nenhum roomId encontrado!');
+            console.error('Valores:', { prevCreatedRoomId, prevJoinedRoomId });
+            // Tenta usar o roomId do gameState se disponível
+            if (gameState.roomId) {
+              console.log('⚠️ Tentando usar roomId do gameState:', gameState.roomId);
+              setTimeout(() => {
+                if (prevCreatedRoomId) {
+                  onCreateRoom(gameState.roomId);
+                } else {
+                  onJoinRoom(gameState.roomId, playerColor, currentNickname);
+                }
+              }, 50);
+            }
+            return null;
+          }
+        });
+        
+        return null; // Limpa createdRoomId
+      });
+      
+      setMode(null);
     });
 
     socket.on('room-error', ({ message }) => {
