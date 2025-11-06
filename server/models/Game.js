@@ -349,6 +349,7 @@ export default class Game {
    */
   getState() {
     return {
+      roomId: this.roomId,
       board: this.board,
       currentPlayer: this.currentPlayer,
       players: this.players,

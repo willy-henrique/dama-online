@@ -15,9 +15,19 @@ export default class SocketHandler {
       // Criar sala
       socket.on('create-room', (nickname) => {
         const roomId = this.gameController.createRoom();
+        const game = this.gameController.getGame(roomId);
         socket.join(roomId);
+        
+        // Adiciona o jogador que criou a sala
+        const color = this.gameController.addPlayerToRoom(roomId, socket.id, nickname);
+        console.log(`🏠 Sala criada: ${roomId} por ${nickname} (${color})`);
+        
         socket.emit('room-created', { roomId });
-        console.log(`🏠 Sala criada: ${roomId} por ${nickname}`);
+        
+        // Envia o estado atual do jogo (aguardando segundo jogador)
+        const gameState = game.getState();
+        gameState.roomId = roomId;
+        socket.emit('game-state', gameState);
       });
 
       // Entrar em sala
@@ -83,12 +93,14 @@ export default class SocketHandler {
 
         if (result.valid) {
           // Envia atualização para todos na sala
+          const gameState = game.getState();
+          gameState.roomId = roomId;
           this.io.to(roomId).emit('move-made', {
             from,
             to,
             captured: result.captured,
             mustContinue: result.mustContinue,
-            gameState: game.getState()
+            gameState: gameState
           });
 
           // Se há captura obrigatória e o jogador deve continuar
@@ -108,8 +120,28 @@ export default class SocketHandler {
         const game = this.gameController.getGame(roomId);
         if (game) {
           game.reset();
-          this.io.to(roomId).emit('game-reset', game.getState());
+          const gameState = game.getState();
+          gameState.roomId = roomId;
+          this.io.to(roomId).emit('game-reset', gameState);
         }
+      });
+
+      // Solicitar estado do jogo
+      socket.on('get-game-state', ({ roomId }) => {
+        const game = this.gameController.getGame(roomId);
+        if (game) {
+          const gameState = game.getState();
+          gameState.roomId = roomId;
+          socket.emit('game-state', gameState);
+          console.log(`📡 Estado do jogo enviado para ${socket.id} na sala ${roomId}`);
+        }
+      });
+
+      // Sair da sala
+      socket.on('leave-room', ({ roomId }) => {
+        console.log(`🚪 Jogador ${socket.id} saiu da sala ${roomId}`);
+        socket.leave(roomId);
+        this.gameController.removePlayer(socket.id);
       });
 
       // Desconexão
