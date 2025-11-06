@@ -2,6 +2,16 @@
 
 Este guia explica como fazer o deploy do jogo de Damas Online no Vercel (front-end) e Render/Railway (back-end).
 
+## ⚠️ IMPORTANTE: Duas Plataformas Diferentes
+
+**O projeto precisa de DUAS plataformas:**
+- 🎨 **Vercel**: Para o front-end (pasta `client/`)
+- 🖥️ **Render/Railway**: Para o back-end (pasta `server/`)
+
+**❌ NÃO coloque o servidor no Vercel!** O Vercel é apenas para o front-end.
+
+📖 Para entender melhor a arquitetura, veja: **[ARQUITETURA_DEPLOY.md](./ARQUITETURA_DEPLOY.md)**
+
 ## 📋 Pré-requisitos
 
 1. Conta no [Vercel](https://vercel.com) (gratuita)
