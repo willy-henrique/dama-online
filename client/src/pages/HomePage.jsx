@@ -29,12 +29,22 @@ export default function HomePage({ socket, onCreateRoom, onJoinRoom }) {
 
     socket.on('room-created', ({ roomId }) => {
       console.log('✅ Sala criada! Room ID:', roomId);
-      setCreatedRoomId(roomId);
-      onCreateRoom(roomId);
+      if (roomId) {
+        setCreatedRoomId(roomId);
+        // Não chama onCreateRoom aqui, deixa mostrar o ID primeiro
+      }
     });
 
     socket.on('room-joined', ({ roomId, color, nickname }) => {
+      // Quando alguém entrar na sala, vai para o jogo
       onJoinRoom(roomId, color, nickname);
+    });
+
+    socket.on('game-started', (gameState) => {
+      // Quando o jogo começar (2 jogadores), vai para a página do jogo
+      if (createdRoomId) {
+        onCreateRoom(createdRoomId);
+      }
     });
 
     socket.on('room-error', ({ message }) => {
@@ -45,6 +55,7 @@ export default function HomePage({ socket, onCreateRoom, onJoinRoom }) {
       socket.off('room-created');
       socket.off('room-joined');
       socket.off('room-error');
+      socket.off('game-started');
     };
   }, [socket, onCreateRoom, onJoinRoom]);
 
@@ -125,11 +136,17 @@ export default function HomePage({ socket, onCreateRoom, onJoinRoom }) {
                 </button>
               </div>
             </div>
-            <p className="text-sm text-gray-400 text-center">
+            <p className="text-sm text-gray-400 text-center mb-4">
               Compartilhe este código com seu oponente
             </p>
-            <div className="text-center text-gray-500">
-              Aguardando outro jogador...
+            <div className="bg-dark-700 rounded-lg p-4 text-center">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <div className="animate-pulse w-2 h-2 bg-accent-cyan rounded-full"></div>
+                <p className="text-gray-300">Aguardando outro jogador...</p>
+              </div>
+              <p className="text-xs text-gray-500 mt-2">
+                Quando alguém entrar, o jogo começará automaticamente
+              </p>
             </div>
           </div>
         </div>
