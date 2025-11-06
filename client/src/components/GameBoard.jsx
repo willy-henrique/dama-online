@@ -36,12 +36,26 @@ export default function GameBoard({
 
   const handleCellClick = (row, col) => {
     // Se o jogo acabou, não permite movimentos
-    if (gameStatus === 'finished') return;
+    if (gameStatus === 'finished') {
+      console.log('❌ Jogo acabou, não pode mover');
+      return;
+    }
+
+    // Se não tem cor definida, não permite movimentos
+    if (!playerColor) {
+      console.log('❌ Cor do jogador não definida');
+      return;
+    }
 
     // Se não é o turno do jogador, não permite movimentos
-    if (currentPlayer !== playerColor) return;
+    if (currentPlayer !== playerColor) {
+      console.log(`❌ Não é seu turno. Turno atual: ${currentPlayer}, Você: ${playerColor}`);
+      return;
+    }
 
+    // Usa coordenadas reais (não invertidas)
     const piece = board[row][col];
+    console.log('🖱️ Célula clicada:', { row, col, piece, playerColor });
 
     // Se clicou em uma peça do jogador
     if (piece && piece.color === playerColor) {
@@ -56,24 +70,26 @@ export default function GameBoard({
       return;
     }
 
-      // Se há uma peça selecionada e clicou em uma célula válida
-      if (selectedPiece) {
-        const move = validMoves.find(
-          m => m.to.row === row && m.to.col === col
-        );
+    // Se há uma peça selecionada e clicou em uma célula válida
+    if (selectedPiece) {
+      const move = validMoves.find(
+        m => m.to.row === row && m.to.col === col
+      );
 
-        if (move) {
-          // Usa coordenadas reais para o movimento
-          onMove(selectedPiece, { row, col });
-          setSelectedPiece(null);
-          setValidMoves([]);
-          setHighlightedCells([]);
-        } else {
-          // Clicou em célula inválida, deseleciona
-          setSelectedPiece(null);
-        }
+      if (move) {
+        // Usa coordenadas reais para o movimento
+        console.log('✅ Movimento válido:', { from: selectedPiece, to: { row, col } });
+        onMove(selectedPiece, { row, col });
+        setSelectedPiece(null);
+        setValidMoves([]);
+        setHighlightedCells([]);
+      } else {
+        // Clicou em célula inválida, deseleciona
+        console.log('❌ Movimento inválido');
+        setSelectedPiece(null);
       }
-    };
+    }
+  };
 
   const isCellHighlighted = (row, col) => {
     return highlightedCells.some(cell => cell.row === row && cell.col === col);
