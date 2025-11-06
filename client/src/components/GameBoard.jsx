@@ -77,15 +77,20 @@ export default function GameBoard({
       );
 
       if (move) {
-        // Usa coordenadas reais para o movimento
-        console.log('✅ Movimento válido:', { from: selectedPiece, to: { row, col } });
+        // Usa coordenadas reais para o movimento (já estão nas coordenadas corretas)
+        console.log('✅ Movimento válido:', { 
+          from: { row: selectedPiece.row, col: selectedPiece.col }, 
+          to: { row, col },
+          playerColor,
+          currentPlayer
+        });
         onMove(selectedPiece, { row, col });
         setSelectedPiece(null);
         setValidMoves([]);
         setHighlightedCells([]);
       } else {
         // Clicou em célula inválida, deseleciona
-        console.log('❌ Movimento inválido');
+        console.log('❌ Movimento inválido. Movimentos válidos:', validMoves);
         setSelectedPiece(null);
       }
     }

@@ -15,6 +15,12 @@ export default function GamePage({ socket, gameData, onBackToHome }) {
 
     console.log('🎮 GamePage montado. Socket:', socket.id, 'GameData:', gameData);
 
+    // Solicita o estado atual do jogo ao entrar na página
+    if (gameData.roomId) {
+      console.log('📡 Solicitando estado do jogo para a sala:', gameData.roomId);
+      socket.emit('get-game-state', { roomId: gameData.roomId });
+    }
+
     // Eventos do Socket.IO
     socket.on('game-started', (state) => {
       console.log('🎮 Jogo iniciado!', state);
@@ -45,6 +51,9 @@ export default function GamePage({ socket, gameData, onBackToHome }) {
       if (!detectedColor && gameData.color) {
         console.log('⚠️ Usando cor do gameData como fallback:', gameData.color);
         setPlayerColor(gameData.color);
+        if (gameData.nickname) {
+          setPlayerNickname(gameData.nickname);
+        }
       }
       
       console.log('✅ Cor do jogador definida:', detectedColor || gameData.color);
@@ -74,16 +83,22 @@ export default function GamePage({ socket, gameData, onBackToHome }) {
       
       // Fallback: usa a cor do gameData se não detectou
       if (!detectedColor && gameData.color) {
+        console.log('⚠️ Usando cor do gameData como fallback:', gameData.color);
         setPlayerColor(gameData.color);
+        if (gameData.nickname) {
+          setPlayerNickname(gameData.nickname);
+        }
       }
       
       // Se ainda não tem cor, tenta determinar pelo estado
       if (!detectedColor && !gameData.color) {
         if (state.players.white && !state.players.black) {
           // Só tem jogador branco, então este deve ser o preto
+          console.log('⚠️ Determinando cor pelo estado: black');
           setPlayerColor('black');
         } else if (state.players.black && !state.players.white) {
           // Só tem jogador preto, então este deve ser o branco
+          console.log('⚠️ Determinando cor pelo estado: white');
           setPlayerColor('white');
         }
       }
