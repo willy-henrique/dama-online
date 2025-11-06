@@ -7,6 +7,8 @@ export default function Home({ onStartGame }) {
   const [roomId, setRoomId] = useState('');
   const [mode, setMode] = useState(null); // 'create' ou 'join'
   const [createdRoomId, setCreatedRoomId] = useState(null);
+  const [joinedRoomId, setJoinedRoomId] = useState(null);
+  const [waitingForPlayer, setWaitingForPlayer] = useState(false);
   const [error, setError] = useState('');
   const [status, setStatus] = useState('');
 
@@ -80,7 +82,7 @@ export default function Home({ onStartGame }) {
       socket.off('game-started');
       socket.off('room-error');
     };
-  }, [createdRoomId, roomId, nickname, setState, onStartGame]);
+  }, [createdRoomId, joinedRoomId, roomId, nickname, setState, onStartGame]);
 
   const handleCreateRoom = (e) => {
     e.preventDefault();
@@ -147,7 +149,10 @@ export default function Home({ onStartGame }) {
     }
   };
 
-  if (createdRoomId) {
+  // Tela de sala criada ou aguardando jogador
+  if (createdRoomId || (joinedRoomId && waitingForPlayer)) {
+    const isCreator = !!createdRoomId;
+    
     return (
       <div className="min-h-screen flex items-center justify-center p-3 sm:p-4">
         <div className="bg-dark-800 rounded-xl sm:rounded-2xl shadow-2xl p-4 sm:p-6 md:p-8 max-w-md w-full border border-dark-700">
@@ -155,6 +160,8 @@ export default function Home({ onStartGame }) {
             <button
               onClick={() => {
                 setCreatedRoomId(null);
+                setJoinedRoomId(null);
+                setWaitingForPlayer(false);
                 reset();
               }}
               className="text-gray-400 hover:text-white transition text-sm sm:text-base flex items-center gap-1"
@@ -165,48 +172,52 @@ export default function Home({ onStartGame }) {
           </div>
           
           <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 text-center text-accent-cyan">
-            Sala Criada!
+            {isCreator ? 'Sala Criada!' : 'Aguardando Jogador'}
           </h2>
           
           <div className="space-y-3 sm:space-y-4">
-            <div>
-              <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-2">
-                Código da Sala
-              </label>
-              <div className="bg-dark-700 border-2 border-accent-cyan/50 rounded-lg px-3 sm:px-4 py-3 sm:py-4 mb-3">
-                <input
-                  type="text"
-                  value={createdRoomId}
-                  readOnly
-                  className="w-full bg-transparent text-xl sm:text-3xl font-bold text-center text-accent-cyan tracking-wider focus:outline-none"
-                />
-              </div>
-              
-              <div className="grid grid-cols-2 gap-2 sm:gap-3">
-                <button
-                  onClick={copyRoomId}
-                  className="flex items-center justify-center gap-2 px-3 sm:px-4 py-2 sm:py-3 bg-accent-cyan text-dark-900 rounded-lg font-semibold hover:bg-accent-cyan/80 transition text-xs sm:text-sm active:scale-95"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                  </svg>
-                  Copiar
-                </button>
-                <button
-                  onClick={shareRoomId}
-                  className="flex items-center justify-center gap-2 px-3 sm:px-4 py-2 sm:py-3 bg-accent-orange text-white rounded-lg font-semibold hover:bg-accent-orange/80 transition text-xs sm:text-sm active:scale-95"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                  </svg>
-                  Compartilhar
-                </button>
-              </div>
-            </div>
-            
-            <p className="text-xs sm:text-sm text-gray-400 text-center mb-3 sm:mb-4">
-              Compartilhe este código com seu oponente
-            </p>
+            {isCreator && (
+              <>
+                <div>
+                  <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-2">
+                    Código da Sala
+                  </label>
+                  <div className="bg-dark-700 border-2 border-accent-cyan/50 rounded-lg px-3 sm:px-4 py-3 sm:py-4 mb-3">
+                    <input
+                      type="text"
+                      value={createdRoomId}
+                      readOnly
+                      className="w-full bg-transparent text-xl sm:text-3xl font-bold text-center text-accent-cyan tracking-wider focus:outline-none"
+                    />
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                    <button
+                      onClick={copyRoomId}
+                      className="flex items-center justify-center gap-2 px-3 sm:px-4 py-2 sm:py-3 bg-accent-cyan text-dark-900 rounded-lg font-semibold hover:bg-accent-cyan/80 transition text-xs sm:text-sm active:scale-95"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                      </svg>
+                      Copiar
+                    </button>
+                    <button
+                      onClick={shareRoomId}
+                      className="flex items-center justify-center gap-2 px-3 sm:px-4 py-2 sm:py-3 bg-accent-orange text-white rounded-lg font-semibold hover:bg-accent-orange/80 transition text-xs sm:text-sm active:scale-95"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                      </svg>
+                      Compartilhar
+                    </button>
+                  </div>
+                </div>
+                
+                <p className="text-xs sm:text-sm text-gray-400 text-center mb-3 sm:mb-4">
+                  Compartilhe este código com seu oponente
+                </p>
+              </>
+            )}
             
             <div className="bg-dark-700 rounded-lg p-3 sm:p-4 text-center">
               <div className="flex items-center justify-center gap-2 mb-2">
@@ -214,7 +225,9 @@ export default function Home({ onStartGame }) {
                 <p className="text-sm sm:text-base text-gray-300">{status || 'Aguardando outro jogador...'}</p>
               </div>
               <p className="text-xs text-gray-500 mt-2">
-                Quando alguém entrar, o jogo começará automaticamente
+                {isCreator 
+                  ? 'Quando alguém entrar, o jogo começará automaticamente'
+                  : 'Aguardando o criador da sala...'}
               </p>
             </div>
           </div>
@@ -283,7 +296,7 @@ export default function Home({ onStartGame }) {
                 onClick={() => setMode('join')}
                 className="w-full bg-gradient-to-r from-accent-orange to-accent-orange/80 text-white font-bold py-3 sm:py-4 rounded-lg hover:from-accent-orange/90 hover:to-accent-orange/70 transition shadow-lg text-sm sm:text-base"
               >
-                Entrar na Sala
+                Ir para a Sala
               </button>
             </div>
           ) : mode === 'create' ? (
@@ -359,7 +372,7 @@ export default function Home({ onStartGame }) {
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                 </svg>
-                Entrar na Sala
+                Ir para a Sala
               </button>
             </form>
           )}
