@@ -110,53 +110,57 @@ export default function GameBoard({
   };
 
   return (
-    <div className="bg-dark-800 rounded-2xl p-6 border border-dark-700">
+    <div className="bg-dark-800 rounded-xl sm:rounded-2xl p-3 sm:p-6 border border-dark-700">
       {gameStatus === 'finished' && (
-        <div className="mb-4 p-4 bg-gradient-to-r from-accent-cyan to-accent-orange rounded-lg text-center">
-          <p className="text-xl font-bold">
+        <div className="mb-2 sm:mb-4 p-2 sm:p-4 bg-gradient-to-r from-accent-cyan to-accent-orange rounded-lg text-center">
+          <p className="text-base sm:text-xl font-bold">
             {winner === playerColor ? '🎉 Você venceu!' : '😔 Você perdeu!'}
           </p>
         </div>
       )}
 
       {mustContinueCapture && (
-        <div className="mb-4 p-3 bg-yellow-500/20 border border-yellow-500/50 rounded-lg text-yellow-400 text-center">
+        <div className="mb-2 sm:mb-4 p-2 sm:p-3 bg-yellow-500/20 border border-yellow-500/50 rounded-lg text-yellow-400 text-center text-xs sm:text-sm">
           Você deve continuar capturando!
         </div>
       )}
 
       <div className="flex justify-center p-2 sm:p-4">
         <div className="grid grid-cols-8 gap-0 border-2 sm:border-4 border-dark-700 shadow-2xl max-w-full">
-          {board.map((row, rowIndex) =>
-            row.map((cell, colIndex) => {
-              // Inverte as coordenadas para exibição
-              const displayRow = getDisplayRow(rowIndex);
-              const displayCol = getDisplayCol(colIndex);
+          {/* Renderiza o tabuleiro invertido se necessário */}
+          {Array.from({ length: 8 }, (_, displayRow) => 
+            Array.from({ length: 8 }, (_, displayCol) => {
+              // Converte coordenadas de exibição para reais
+              const actualRow = getActualRow(displayRow);
+              const actualCol = getActualCol(displayCol);
+              const cell = board[actualRow][actualCol];
               const cellColor = getCellColor(displayRow, displayCol);
-              const isHighlighted = isCellHighlighted(rowIndex, colIndex);
-              const isSelected = isCellSelected(rowIndex, colIndex);
+              const isHighlighted = isCellHighlighted(actualRow, actualCol);
+              const isSelected = isCellSelected(actualRow, actualCol);
               const canMove = currentPlayer === playerColor && gameStatus === 'playing';
 
               return (
                 <div
-                  key={`${rowIndex}-${colIndex}`}
-                  onClick={() => handleCellClick(rowIndex, colIndex)}
+                  key={`${displayRow}-${displayCol}`}
+                  onClick={() => handleCellClick(actualRow, actualCol)}
                   className={`
-                    w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20
+                    w-8 h-8 xs:w-10 xs:h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 lg:w-20 lg:h-20
                     ${cellColor}
-                    ${isSelected ? 'ring-4 ring-accent-cyan' : ''}
-                    ${isHighlighted ? 'ring-2 ring-accent-orange' : ''}
-                    ${canMove && cell && cell.color === playerColor ? 'cursor-pointer hover:opacity-80' : ''}
+                    ${isSelected ? 'ring-2 sm:ring-4 ring-accent-cyan' : ''}
+                    ${isHighlighted ? 'ring-1 sm:ring-2 ring-accent-orange' : ''}
+                    ${canMove && cell && cell.color === playerColor ? 'cursor-pointer hover:opacity-80 active:scale-95' : ''}
                     ${canMove && isHighlighted ? 'cursor-pointer hover:bg-accent-orange/30' : ''}
                     ${!canMove ? 'cursor-not-allowed opacity-50' : ''}
                     transition-all duration-200
                     flex items-center justify-center
                     relative
+                    touch-none
+                    select-none
                   `}
                 >
                   {cell && renderPiece(cell)}
                   {isHighlighted && !cell && (
-                    <div className="absolute w-3 h-3 bg-accent-orange rounded-full"></div>
+                    <div className="absolute w-2 h-2 sm:w-3 sm:h-3 bg-accent-orange rounded-full"></div>
                   )}
                 </div>
               );

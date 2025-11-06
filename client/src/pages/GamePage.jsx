@@ -16,6 +16,9 @@ export default function GamePage({ socket, gameData, onBackToHome }) {
     // Eventos do Socket.IO
     socket.on('game-started', (state) => {
       console.log('🎮 Jogo iniciado!', state);
+      console.log('Socket ID:', socket.id);
+      console.log('White player ID:', state.players.white?.id);
+      console.log('Black player ID:', state.players.black?.id);
       setGameState(state);
       // Determina a cor do jogador baseado no socket.id
       if (state.players.white?.id === socket.id) {
@@ -118,32 +121,22 @@ export default function GamePage({ socket, gameData, onBackToHome }) {
   }
 
   return (
-    <div className="min-h-screen p-4">
+    <div className="min-h-screen p-2 sm:p-4">
       <div className="max-w-6xl mx-auto">
-        <div className="mb-4 flex items-center justify-between">
+        <div className="mb-2 sm:mb-4 flex items-center justify-between text-xs sm:text-sm">
           <button
             onClick={onBackToHome}
-            className="text-gray-400 hover:text-white transition"
+            className="text-gray-400 hover:text-white transition px-2 py-1 sm:px-4 sm:py-2"
           >
-            ← Voltar ao menu
+            ← Voltar
           </button>
-          <p className="text-xs text-gray-500">WillTech - Solução web</p>
+          <p className="text-xs text-gray-500 hidden sm:block">WillTech - Solução web</p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-          <div className="lg:col-span-1">
-            <GameInfo
-              gameState={gameState}
-              playerColor={playerColor}
-              playerNickname={playerNickname}
-              opponentNickname={opponentNickname}
-              error={error}
-              mustContinueCapture={mustContinueCapture}
-              onReset={handleReset}
-            />
-          </div>
-
-          <div className="lg:col-span-3">
+        {/* Mobile: Tabuleiro primeiro, depois info */}
+        <div className="flex flex-col lg:grid lg:grid-cols-4 gap-2 sm:gap-4">
+          {/* Tabuleiro - Mobile primeiro, Desktop depois */}
+          <div className="order-1 lg:order-2 lg:col-span-3">
             <GameBoard
               board={gameState.board}
               currentPlayer={gameState.currentPlayer}
@@ -154,9 +147,22 @@ export default function GamePage({ socket, gameData, onBackToHome }) {
               mustContinueCapture={mustContinueCapture}
             />
           </div>
+
+          {/* Info - Mobile depois, Desktop primeiro */}
+          <div className="order-2 lg:order-1 lg:col-span-1">
+            <GameInfo
+              gameState={gameState}
+              playerColor={playerColor}
+              playerNickname={playerNickname}
+              opponentNickname={opponentNickname}
+              error={error}
+              mustContinueCapture={mustContinueCapture}
+              onReset={handleReset}
+            />
+          </div>
         </div>
 
-        <div className="mt-6 text-center">
+        <div className="mt-4 sm:mt-6 text-center">
           <p className="text-xs text-gray-500">WillTech - Solução web</p>
         </div>
       </div>
