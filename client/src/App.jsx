@@ -67,6 +67,7 @@ function App() {
           socket={socket} 
           onCreateRoom={handleCreateRoom}
           onJoinRoom={handleJoinRoom}
+          onBackToHome={handleBackToHome}
         />
       ) : (
         <GamePage 

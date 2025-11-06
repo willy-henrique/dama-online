@@ -11,7 +11,7 @@ const socketOptions = {
   }
 };
 
-export default function HomePage({ socket, onCreateRoom, onJoinRoom }) {
+export default function HomePage({ socket, onCreateRoom, onJoinRoom, onBackToHome }) {
   const [nickname, setNickname] = useState('');
   const [roomId, setRoomId] = useState('');
   const [mode, setMode] = useState(null); // 'create' ou 'join'
@@ -124,46 +124,77 @@ export default function HomePage({ socket, onCreateRoom, onJoinRoom }) {
 
   const copyRoomId = () => {
     navigator.clipboard.writeText(createdRoomId);
-    alert('Código copiado!');
+    // Melhor feedback visual
+    const button = document.activeElement;
+    const originalText = button.textContent;
+    button.textContent = '✓ Copiado!';
+    button.classList.add('bg-green-500');
+    setTimeout(() => {
+      button.textContent = originalText;
+      button.classList.remove('bg-green-500');
+    }, 2000);
+  };
+
+  const handleLeaveRoom = () => {
+    if (socket && createdRoomId) {
+      // Sai da sala no servidor
+      socket.emit('leave-room', { roomId: createdRoomId });
+    }
+    setCreatedRoomId(null);
+    setJoinedRoomId(null);
+    setMode(null);
+    if (onBackToHome) {
+      onBackToHome();
+    }
   };
 
   if (createdRoomId) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4">
-        <div className="bg-dark-800 rounded-2xl shadow-2xl p-8 max-w-md w-full border border-dark-700">
-          <div className="text-center mb-2">
+      <div className="min-h-screen flex items-center justify-center p-3 sm:p-4">
+        <div className="bg-dark-800 rounded-xl sm:rounded-2xl shadow-2xl p-4 sm:p-6 md:p-8 max-w-md w-full border border-dark-700">
+          <div className="flex items-center justify-between mb-2 sm:mb-4">
+            <button
+              onClick={handleLeaveRoom}
+              className="text-gray-400 hover:text-white transition text-sm sm:text-base flex items-center gap-1"
+            >
+              ← Sair da Sala
+            </button>
             <p className="text-xs text-gray-500">WillTech - Solução web</p>
           </div>
-          <h2 className="text-2xl font-bold mb-4 text-center text-accent-cyan">
+          
+          <h2 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 text-center text-accent-cyan">
             Sala Criada!
           </h2>
-          <div className="space-y-4">
+          
+          <div className="space-y-3 sm:space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-2">
                 Código da Sala
               </label>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                 <input
                   type="text"
                   value={createdRoomId}
                   readOnly
-                  className="flex-1 bg-dark-700 border border-dark-600 rounded-lg px-4 py-3 text-2xl font-bold text-center text-accent-cyan tracking-wider"
+                  className="flex-1 bg-dark-700 border border-dark-600 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-lg sm:text-2xl font-bold text-center text-accent-cyan tracking-wider"
                 />
                 <button
                   onClick={copyRoomId}
-                  className="px-4 py-3 bg-accent-cyan text-dark-900 rounded-lg font-semibold hover:bg-accent-cyan/80 transition"
+                  className="px-4 py-2 sm:py-3 bg-accent-cyan text-dark-900 rounded-lg font-semibold hover:bg-accent-cyan/80 transition text-sm sm:text-base"
                 >
                   Copiar
                 </button>
               </div>
             </div>
-            <p className="text-sm text-gray-400 text-center mb-4">
+            
+            <p className="text-xs sm:text-sm text-gray-400 text-center mb-3 sm:mb-4">
               Compartilhe este código com seu oponente
             </p>
-            <div className="bg-dark-700 rounded-lg p-4 text-center">
+            
+            <div className="bg-dark-700 rounded-lg p-3 sm:p-4 text-center">
               <div className="flex items-center justify-center gap-2 mb-2">
                 <div className="animate-pulse w-2 h-2 bg-accent-cyan rounded-full"></div>
-                <p className="text-gray-300">Aguardando outro jogador...</p>
+                <p className="text-sm sm:text-base text-gray-300">Aguardando outro jogador...</p>
               </div>
               <p className="text-xs text-gray-500 mt-2">
                 Quando alguém entrar, o jogo começará automaticamente
@@ -194,9 +225,9 @@ export default function HomePage({ socket, onCreateRoom, onJoinRoom }) {
           )}
 
           {!mode ? (
-            <div className="space-y-4">
+            <div className="space-y-3 sm:space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-2">
                   Seu Nickname
                 </label>
                 <input
@@ -204,14 +235,14 @@ export default function HomePage({ socket, onCreateRoom, onJoinRoom }) {
                   value={nickname}
                   onChange={(e) => setNickname(e.target.value)}
                   placeholder="Digite seu nome"
-                  className="w-full bg-dark-700 border border-dark-600 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-cyan"
+                  className="w-full bg-dark-700 border border-dark-600 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-cyan"
                   maxLength={20}
                 />
               </div>
 
               <button
                 onClick={() => setMode('create')}
-                className="w-full bg-gradient-to-r from-accent-cyan to-accent-cyan/80 text-dark-900 font-bold py-4 rounded-lg hover:from-accent-cyan/90 hover:to-accent-cyan/70 transition shadow-lg"
+                className="w-full bg-gradient-to-r from-accent-cyan to-accent-cyan/80 text-dark-900 font-bold py-3 sm:py-4 rounded-lg hover:from-accent-cyan/90 hover:to-accent-cyan/70 transition shadow-lg text-sm sm:text-base"
               >
                 Criar Sala
               </button>
@@ -220,14 +251,14 @@ export default function HomePage({ socket, onCreateRoom, onJoinRoom }) {
                 <div className="absolute inset-0 flex items-center">
                   <div className="w-full border-t border-dark-600"></div>
                 </div>
-                <div className="relative flex justify-center text-sm">
+                <div className="relative flex justify-center text-xs sm:text-sm">
                   <span className="px-2 bg-dark-800 text-gray-400">ou</span>
                 </div>
               </div>
 
               <button
                 onClick={() => setMode('join')}
-                className="w-full bg-gradient-to-r from-accent-orange to-accent-orange/80 text-white font-bold py-4 rounded-lg hover:from-accent-orange/90 hover:to-accent-orange/70 transition shadow-lg"
+                className="w-full bg-gradient-to-r from-accent-orange to-accent-orange/80 text-white font-bold py-3 sm:py-4 rounded-lg hover:from-accent-orange/90 hover:to-accent-orange/70 transition shadow-lg text-sm sm:text-base"
               >
                 Entrar na Sala
               </button>
