@@ -135,58 +135,23 @@ npm run dev
 
 ## 🌐 Deploy Online
 
-### Front-end (Vercel)
+Para instruções detalhadas de deploy no Vercel (front-end) e Render/Railway (back-end), consulte o arquivo **[DEPLOY.md](./DEPLOY.md)**.
 
-1. **Instale a Vercel CLI:**
-```bash
-npm i -g vercel
-```
+### Resumo Rápido
 
-2. **Configure variáveis de ambiente:**
-Crie um arquivo `.env` no diretório `client/`:
-```
-VITE_SERVER_URL=https://seu-servidor.onrender.com
-```
+1. **Back-end (Render/Railway)**:
+   - Conecte o repositório GitHub
+   - Configure `Root Directory: server`
+   - Adicione variáveis: `PORT=3001` e `CLIENT_URL` (será atualizado depois)
 
-3. **Deploy:**
-```bash
-cd client
-vercel
-```
+2. **Front-end (Vercel)**:
+   - Conecte o repositório GitHub
+   - Configure `Root Directory: client`
+   - Adicione variável: `VITE_SERVER_URL` (URL do seu servidor)
 
-### Back-end (Render ou Railway)
+3. **Atualize CLIENT_URL** no back-end com a URL do Vercel
 
-#### Render
-
-1. Crie uma nova conta em [render.com](https://render.com)
-2. Crie um novo "Web Service"
-3. Conecte seu repositório Git
-4. Configure:
-   - **Build Command**: `cd server && npm install`
-   - **Start Command**: `cd server && npm start`
-   - **Environment Variables**: 
-     - `PORT=3001`
-     - `CLIENT_URL=https://seu-app.vercel.app`
-
-#### Railway
-
-1. Crie uma conta em [railway.app](https://railway.app)
-2. Crie um novo projeto
-3. Conecte seu repositório
-4. Configure as variáveis de ambiente (mesmas do Render)
-
-### Variáveis de Ambiente
-
-**Servidor (.env no diretório server/):**
-```
-PORT=3001
-CLIENT_URL=https://seu-app.vercel.app
-```
-
-**Cliente (.env no diretório client/):**
-```
-VITE_SERVER_URL=https://seu-servidor.onrender.com
-```
+📖 **Guia completo**: Veja [DEPLOY.md](./DEPLOY.md) para instruções passo a passo.
 
 ## 🎯 Como Jogar
 
