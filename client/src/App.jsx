@@ -13,7 +13,10 @@ function App() {
   useEffect(() => {
     // Conecta ao servidor Socket.IO
     const newSocket = io(SERVER_URL, {
-      transports: ['websocket', 'polling']
+      transports: ['websocket', 'polling'],
+      extraHeaders: {
+        'ngrok-skip-browser-warning': 'true'
+      }
     });
 
     newSocket.on('connect', () => {

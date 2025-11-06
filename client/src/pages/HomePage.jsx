@@ -3,6 +3,14 @@ import { io } from 'socket.io-client';
 
 const SERVER_URL = import.meta.env.VITE_SERVER_URL || 'http://localhost:3001';
 
+// Configuração do Socket.IO para pular aviso do ngrok
+const socketOptions = {
+  transports: ['websocket', 'polling'],
+  extraHeaders: {
+    'ngrok-skip-browser-warning': 'true'
+  }
+};
+
 export default function HomePage({ socket, onCreateRoom, onJoinRoom }) {
   const [nickname, setNickname] = useState('');
   const [roomId, setRoomId] = useState('');
