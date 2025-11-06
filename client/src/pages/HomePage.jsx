@@ -51,8 +51,13 @@ export default function HomePage({ socket, onCreateRoom, onJoinRoom, onBackToHom
       console.log('Black player ID:', gameState.players.black?.id);
       
       // Quando o jogo começar (2 jogadores), ambos vão para a página do jogo
-      const currentRoomId = createdRoomId || joinedRoomId;
-      console.log('📋 Room IDs:', { createdRoomId, joinedRoomId, currentRoomId });
+      // Captura os valores antes de limpar o estado
+      const currentCreatedRoomId = createdRoomId;
+      const currentJoinedRoomId = joinedRoomId;
+      const currentRoomId = currentCreatedRoomId || currentJoinedRoomId;
+      const currentNickname = nickname;
+      
+      console.log('📋 Room IDs:', { createdRoomId: currentCreatedRoomId, joinedRoomId: currentJoinedRoomId, currentRoomId });
       
       if (currentRoomId) {
         // Determina a cor do jogador baseado no socket.id
@@ -67,15 +72,18 @@ export default function HomePage({ socket, onCreateRoom, onJoinRoom, onBackToHom
           setJoinedRoomId(null);
           setMode(null);
           
-          if (createdRoomId) {
-            // Jogador que criou a sala - vai para o jogo
-            console.log('🚀 Criador da sala indo para o jogo...');
-            onCreateRoom(currentRoomId);
-          } else if (joinedRoomId) {
-            // Jogador que entrou na sala - vai para o jogo
-            console.log('🚀 Jogador que entrou indo para o jogo...');
-            onJoinRoom(currentRoomId, playerColor, nickname);
-          }
+          // Usa setTimeout para garantir que o estado seja limpo antes da transição
+          setTimeout(() => {
+            if (currentCreatedRoomId) {
+              // Jogador que criou a sala - vai para o jogo
+              console.log('🚀 Criador da sala indo para o jogo...', currentRoomId);
+              onCreateRoom(currentRoomId);
+            } else if (currentJoinedRoomId) {
+              // Jogador que entrou na sala - vai para o jogo
+              console.log('🚀 Jogador que entrou indo para o jogo...', currentRoomId, playerColor);
+              onJoinRoom(currentRoomId, playerColor, currentNickname);
+            }
+          }, 100);
         } else {
           console.error('❌ Não foi possível identificar a cor do jogador');
           console.error('Estado do jogo:', gameState);
