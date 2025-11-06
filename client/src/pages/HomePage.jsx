@@ -16,6 +16,7 @@ export default function HomePage({ socket, onCreateRoom, onJoinRoom }) {
   const [roomId, setRoomId] = useState('');
   const [mode, setMode] = useState(null); // 'create' ou 'join'
   const [createdRoomId, setCreatedRoomId] = useState(null);
+  const [joinedRoomId, setJoinedRoomId] = useState(null);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -37,22 +38,32 @@ export default function HomePage({ socket, onCreateRoom, onJoinRoom }) {
 
     socket.on('room-joined', ({ roomId, color, nickname }) => {
       console.log('✅ Entrou na sala! Room:', roomId, 'Color:', color);
-      // Quando alguém entrar na sala, vai para o jogo
+      setJoinedRoomId(roomId);
+      // Quando alguém entrar na sala, vai para o jogo imediatamente
       onJoinRoom(roomId, color, nickname);
     });
 
     socket.on('game-started', (gameState) => {
       console.log('🎮 Jogo iniciado!', gameState);
+      console.log('Socket ID:', socket.id);
       // Quando o jogo começar (2 jogadores), ambos vão para a página do jogo
-      if (createdRoomId) {
-        // Jogador que criou a sala
-        onCreateRoom(createdRoomId);
-      } else if (roomId) {
-        // Jogador que entrou na sala
+      const currentRoomId = createdRoomId || joinedRoomId;
+      if (currentRoomId) {
+        // Determina a cor do jogador baseado no socket.id
         const playerColor = gameState.players.white?.id === socket.id ? 'white' : 
                            gameState.players.black?.id === socket.id ? 'black' : null;
+        
         if (playerColor) {
-          onJoinRoom(roomId, playerColor, nickname);
+          console.log('🎯 Jogador identificado:', playerColor);
+          if (createdRoomId) {
+            // Jogador que criou a sala
+            onCreateRoom(createdRoomId);
+          } else {
+            // Jogador que entrou na sala
+            onJoinRoom(currentRoomId, playerColor, nickname);
+          }
+        } else {
+          console.error('❌ Não foi possível identificar a cor do jogador');
         }
       }
     });

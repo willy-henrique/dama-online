@@ -13,6 +13,8 @@ export default function GamePage({ socket, gameData, onBackToHome }) {
   useEffect(() => {
     if (!socket || !gameData) return;
 
+    console.log('🎮 GamePage montado. Socket:', socket.id, 'GameData:', gameData);
+
     // Eventos do Socket.IO
     socket.on('game-started', (state) => {
       console.log('🎮 Jogo iniciado!', state);
@@ -20,42 +22,70 @@ export default function GamePage({ socket, gameData, onBackToHome }) {
       console.log('White player ID:', state.players.white?.id);
       console.log('Black player ID:', state.players.black?.id);
       setGameState(state);
+      
       // Determina a cor do jogador baseado no socket.id
+      let detectedColor = null;
       if (state.players.white?.id === socket.id) {
+        detectedColor = 'white';
         setPlayerColor('white');
         setPlayerNickname(state.players.white.nickname);
         if (state.players.black) {
           setOpponentNickname(state.players.black.nickname);
         }
       } else if (state.players.black?.id === socket.id) {
+        detectedColor = 'black';
         setPlayerColor('black');
         setPlayerNickname(state.players.black.nickname);
         if (state.players.white) {
           setOpponentNickname(state.players.white.nickname);
         }
-      } else if (gameData.color) {
-        // Fallback: usa a cor do gameData se disponível
+      }
+      
+      // Fallback: usa a cor do gameData se não detectou
+      if (!detectedColor && gameData.color) {
+        console.log('⚠️ Usando cor do gameData como fallback:', gameData.color);
         setPlayerColor(gameData.color);
       }
+      
+      console.log('✅ Cor do jogador definida:', detectedColor || gameData.color);
     });
 
     socket.on('game-state', (state) => {
+      console.log('📊 Estado do jogo atualizado:', state);
       setGameState(state);
+      
       // Determina a cor do jogador baseado no socket.id
+      let detectedColor = null;
       if (state.players.white?.id === socket.id) {
+        detectedColor = 'white';
         setPlayerColor('white');
         setPlayerNickname(state.players.white.nickname);
         if (state.players.black) {
           setOpponentNickname(state.players.black.nickname);
         }
       } else if (state.players.black?.id === socket.id) {
+        detectedColor = 'black';
         setPlayerColor('black');
         setPlayerNickname(state.players.black.nickname);
         if (state.players.white) {
           setOpponentNickname(state.players.white.nickname);
         }
-      } else if (gameData.color) {
+      }
+      
+      // Fallback: usa a cor do gameData se não detectou
+      if (!detectedColor && gameData.color) {
         setPlayerColor(gameData.color);
+      }
+      
+      // Se ainda não tem cor, tenta determinar pelo estado
+      if (!detectedColor && !gameData.color) {
+        if (state.players.white && !state.players.black) {
+          // Só tem jogador branco, então este deve ser o preto
+          setPlayerColor('black');
+        } else if (state.players.black && !state.players.white) {
+          // Só tem jogador preto, então este deve ser o branco
+          setPlayerColor('white');
+        }
       }
     });
 
