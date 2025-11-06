@@ -28,6 +28,7 @@ export default function HomePage({ socket, onCreateRoom, onJoinRoom }) {
     if (!socket) return;
 
     socket.on('room-created', ({ roomId }) => {
+      console.log('✅ Sala criada! Room ID:', roomId);
       setCreatedRoomId(roomId);
       onCreateRoom(roomId);
     });
@@ -53,9 +54,25 @@ export default function HomePage({ socket, onCreateRoom, onJoinRoom }) {
       setError('Digite um nickname');
       return;
     }
+    
+    if (!socket) {
+      setError('Aguardando conexão com o servidor...');
+      console.error('Socket não está disponível');
+      return;
+    }
+
+    if (!socket.connected) {
+      setError('Não conectado ao servidor. Aguarde...');
+      console.error('Socket não está conectado. Status:', socket.connected);
+      return;
+    }
+
+    console.log('🔄 Criando sala para:', nickname);
+    console.log('Socket conectado?', socket.connected);
     localStorage.setItem('dama-nickname', nickname);
     setError('');
     socket.emit('create-room', nickname);
+    console.log('📤 Evento create-room enviado');
   };
 
   const handleJoinRoom = (e) => {

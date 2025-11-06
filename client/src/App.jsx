@@ -21,10 +21,21 @@ function App() {
 
     newSocket.on('connect', () => {
       console.log('✅ Conectado ao servidor');
+      console.log('Server URL:', SERVER_URL);
+      console.log('Socket ID:', newSocket.id);
     });
 
     newSocket.on('disconnect', () => {
       console.log('❌ Desconectado do servidor');
+    });
+
+    newSocket.on('error', (error) => {
+      console.error('❌ Erro Socket.IO:', error);
+    });
+
+    newSocket.on('connect_error', (error) => {
+      console.error('❌ Erro de conexão:', error);
+      console.error('Tentando conectar em:', SERVER_URL);
     });
 
     setSocket(newSocket);
