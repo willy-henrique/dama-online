@@ -214,6 +214,18 @@ O projeto segue os princípios **SOLID** e padrão **MVC**:
 
 ## 🐛 Troubleshooting
 
+### Erros no Vercel
+
+Para erros relacionados ao deploy no Vercel, consulte o **[GUIA_ERROS_VERCEL.md](./GUIA_ERROS_VERCEL.md)** que contém:
+- Lista completa de erros comuns
+- Soluções específicas para cada erro
+- Guias de diagnóstico
+- Links para soluções detalhadas
+
+**Erros mais comuns:**
+- **404/NOT_FOUND**: Veja [SOLUCAO_404_VERCEL.md](./SOLUCAO_404_VERCEL.md)
+- **DEPLOYMENT_DELETED**: Veja [SOLUCAO_DEPLOYMENT_DELETED.md](./SOLUCAO_DEPLOYMENT_DELETED.md)
+
 ### Problema: "Cannot connect to server"
 - Verifique se o servidor está rodando na porta 3001
 - Verifique se a variável `VITE_SERVER_URL` está configurada corretamente
