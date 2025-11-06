@@ -109,6 +109,17 @@ export default function GameBoard({
     return isLight ? 'bg-amber-100' : 'bg-amber-800';
   };
 
+  // Verifica se o board é válido
+  if (!board || !Array.isArray(board) || board.length === 0) {
+    return (
+      <div className="bg-dark-800 rounded-xl p-6 text-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent-cyan mx-auto mb-2"></div>
+        <p className="text-gray-400">Carregando tabuleiro...</p>
+        {!playerColor && <p className="text-yellow-400 text-sm mt-2">Aguardando identificação do jogador...</p>}
+      </div>
+    );
+  }
+
   const renderPiece = (piece) => {
     if (!piece) return null;
 
