@@ -354,19 +354,24 @@ export default function HomePage({ socket, onCreateRoom, onJoinRoom, onBackToHom
                 <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-2">
                   Código da Sala
                 </label>
-                <input
-                  type="text"
-                  value={roomId}
-                  onChange={(e) => setRoomId(e.target.value.toUpperCase())}
-                  placeholder="Digite o código"
-                  className="w-full bg-dark-700 border border-dark-600 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-orange text-center text-lg sm:text-2xl font-bold tracking-wider uppercase"
-                  maxLength={6}
-                />
+                <div className="bg-dark-700 border-2 border-accent-orange/50 rounded-lg px-3 sm:px-4 py-2 sm:py-3 mb-3">
+                  <input
+                    type="text"
+                    value={roomId}
+                    onChange={(e) => setRoomId(e.target.value.toUpperCase())}
+                    placeholder="Digite o código"
+                    className="w-full bg-transparent text-white placeholder-gray-500 focus:outline-none text-center text-lg sm:text-2xl font-bold tracking-wider uppercase"
+                    maxLength={6}
+                  />
+                </div>
               </div>
               <button
                 type="submit"
-                className="w-full bg-accent-orange text-white font-bold py-3 sm:py-4 rounded-lg hover:bg-accent-orange/80 transition text-sm sm:text-base active:scale-95"
+                className="w-full bg-gradient-to-r from-accent-orange to-accent-orange/80 text-white font-bold py-3 sm:py-4 rounded-lg hover:from-accent-orange/90 hover:to-accent-orange/70 transition text-sm sm:text-base active:scale-95 shadow-lg flex items-center justify-center gap-2"
               >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
                 Entrar na Sala
               </button>
             </form>
