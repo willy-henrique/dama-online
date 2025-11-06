@@ -36,14 +36,24 @@ export default function HomePage({ socket, onCreateRoom, onJoinRoom }) {
     });
 
     socket.on('room-joined', ({ roomId, color, nickname }) => {
+      console.log('✅ Entrou na sala! Room:', roomId, 'Color:', color);
       // Quando alguém entrar na sala, vai para o jogo
       onJoinRoom(roomId, color, nickname);
     });
 
     socket.on('game-started', (gameState) => {
-      // Quando o jogo começar (2 jogadores), vai para a página do jogo
+      console.log('🎮 Jogo iniciado!', gameState);
+      // Quando o jogo começar (2 jogadores), ambos vão para a página do jogo
       if (createdRoomId) {
+        // Jogador que criou a sala
         onCreateRoom(createdRoomId);
+      } else if (roomId) {
+        // Jogador que entrou na sala
+        const playerColor = gameState.players.white?.id === socket.id ? 'white' : 
+                           gameState.players.black?.id === socket.id ? 'black' : null;
+        if (playerColor) {
+          onJoinRoom(roomId, playerColor, nickname);
+        }
       }
     });
 

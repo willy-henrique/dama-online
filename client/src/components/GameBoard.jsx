@@ -14,6 +14,15 @@ export default function GameBoard({
   const [validMoves, setValidMoves] = useState([]);
   const [highlightedCells, setHighlightedCells] = useState([]);
 
+  // Inverte o tabuleiro se o jogador for preto (para ver do seu lado)
+  const shouldFlipBoard = playerColor === 'black';
+  
+  // Função para inverter coordenadas
+  const getDisplayRow = (row) => shouldFlipBoard ? 7 - row : row;
+  const getDisplayCol = (col) => shouldFlipBoard ? 7 - col : col;
+  const getActualRow = (displayRow) => shouldFlipBoard ? 7 - displayRow : displayRow;
+  const getActualCol = (displayCol) => shouldFlipBoard ? 7 - displayCol : displayCol;
+
   useEffect(() => {
     if (selectedPiece) {
       const moves = getValidMoves(board, selectedPiece.row, selectedPiece.col, currentPlayer, mustContinueCapture);
@@ -47,23 +56,24 @@ export default function GameBoard({
       return;
     }
 
-    // Se há uma peça selecionada e clicou em uma célula válida
-    if (selectedPiece) {
-      const move = validMoves.find(
-        m => m.to.row === row && m.to.col === col
-      );
+      // Se há uma peça selecionada e clicou em uma célula válida
+      if (selectedPiece) {
+        const move = validMoves.find(
+          m => m.to.row === row && m.to.col === col
+        );
 
-      if (move) {
-        onMove(selectedPiece, { row, col });
-        setSelectedPiece(null);
-        setValidMoves([]);
-        setHighlightedCells([]);
-      } else {
-        // Clicou em célula inválida, deseleciona
-        setSelectedPiece(null);
+        if (move) {
+          // Usa coordenadas reais para o movimento
+          onMove(selectedPiece, { row, col });
+          setSelectedPiece(null);
+          setValidMoves([]);
+          setHighlightedCells([]);
+        } else {
+          // Clicou em célula inválida, deseleciona
+          setSelectedPiece(null);
+        }
       }
-    }
-  };
+    };
 
   const isCellHighlighted = (row, col) => {
     return highlightedCells.some(cell => cell.row === row && cell.col === col);
@@ -115,11 +125,14 @@ export default function GameBoard({
         </div>
       )}
 
-      <div className="flex justify-center">
-        <div className="grid grid-cols-8 gap-0 border-4 border-dark-700 shadow-2xl">
+      <div className="flex justify-center p-2 sm:p-4">
+        <div className="grid grid-cols-8 gap-0 border-2 sm:border-4 border-dark-700 shadow-2xl max-w-full">
           {board.map((row, rowIndex) =>
             row.map((cell, colIndex) => {
-              const cellColor = getCellColor(rowIndex, colIndex);
+              // Inverte as coordenadas para exibição
+              const displayRow = getDisplayRow(rowIndex);
+              const displayCol = getDisplayCol(colIndex);
+              const cellColor = getCellColor(displayRow, displayCol);
               const isHighlighted = isCellHighlighted(rowIndex, colIndex);
               const isSelected = isCellSelected(rowIndex, colIndex);
               const canMove = currentPlayer === playerColor && gameStatus === 'playing';
@@ -152,8 +165,13 @@ export default function GameBoard({
         </div>
       </div>
 
-      <div className="mt-4 text-center text-sm text-gray-400">
+      <div className="mt-2 sm:mt-4 text-center text-xs sm:text-sm text-gray-400">
         <p>Turno: {currentPlayer === 'white' ? 'Brancas' : 'Pretas'}</p>
+        {playerColor && (
+          <p className="mt-1 text-accent-cyan">
+            Você joga com: {playerColor === 'white' ? 'Brancas' : 'Pretas'}
+          </p>
+        )}
       </div>
     </div>
   );

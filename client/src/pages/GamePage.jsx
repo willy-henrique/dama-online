@@ -15,31 +15,44 @@ export default function GamePage({ socket, gameData, onBackToHome }) {
 
     // Eventos do Socket.IO
     socket.on('game-started', (state) => {
+      console.log('🎮 Jogo iniciado!', state);
       setGameState(state);
-      if (gameData.color) {
+      // Determina a cor do jogador baseado no socket.id
+      if (state.players.white?.id === socket.id) {
+        setPlayerColor('white');
+        setPlayerNickname(state.players.white.nickname);
+        if (state.players.black) {
+          setOpponentNickname(state.players.black.nickname);
+        }
+      } else if (state.players.black?.id === socket.id) {
+        setPlayerColor('black');
+        setPlayerNickname(state.players.black.nickname);
+        if (state.players.white) {
+          setOpponentNickname(state.players.white.nickname);
+        }
+      } else if (gameData.color) {
+        // Fallback: usa a cor do gameData se disponível
         setPlayerColor(gameData.color);
       }
     });
 
     socket.on('game-state', (state) => {
       setGameState(state);
-      if (gameData.color) {
-        setPlayerColor(gameData.color);
-      }
-      // Atualiza nicknames
-      if (state.players.white) {
-        if (gameData.color === 'white') {
-          setPlayerNickname(state.players.white.nickname);
-        } else {
-          setOpponentNickname(state.players.white.nickname);
-        }
-      }
-      if (state.players.black) {
-        if (gameData.color === 'black') {
-          setPlayerNickname(state.players.black.nickname);
-        } else {
+      // Determina a cor do jogador baseado no socket.id
+      if (state.players.white?.id === socket.id) {
+        setPlayerColor('white');
+        setPlayerNickname(state.players.white.nickname);
+        if (state.players.black) {
           setOpponentNickname(state.players.black.nickname);
         }
+      } else if (state.players.black?.id === socket.id) {
+        setPlayerColor('black');
+        setPlayerNickname(state.players.black.nickname);
+        if (state.players.white) {
+          setOpponentNickname(state.players.white.nickname);
+        }
+      } else if (gameData.color) {
+        setPlayerColor(gameData.color);
       }
     });
 

@@ -39,8 +39,8 @@ export default function GameInfo({
   };
 
   return (
-    <div className="bg-dark-800 rounded-2xl p-6 border border-dark-700 space-y-4">
-      <h2 className="text-xl font-bold text-accent-cyan mb-4">Informações do Jogo</h2>
+    <div className="bg-dark-800 rounded-xl sm:rounded-2xl p-3 sm:p-6 border border-dark-700 space-y-3 sm:space-y-4">
+      <h2 className="text-base sm:text-xl font-bold text-accent-cyan mb-2 sm:mb-4">Informações do Jogo</h2>
 
       {error && (
         <div className="p-3 bg-red-500/20 border border-red-500/50 rounded-lg text-red-400 text-sm">
@@ -55,45 +55,45 @@ export default function GameInfo({
       )}
 
       <div className="space-y-3">
-        <div className={`p-3 rounded-lg border-2 ${
+        <div className={`p-2 sm:p-3 rounded-lg border-2 ${
           whitePlayer.isCurrent && gameState.gameStatus === 'playing'
             ? 'border-accent-cyan bg-accent-cyan/10' 
             : 'border-dark-600 bg-dark-700'
         }`}>
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-white rounded-full border-2 border-gray-300"></div>
-              <span className="font-semibold">Brancas</span>
+          <div className="flex items-center justify-between mb-1 sm:mb-2">
+            <div className="flex items-center gap-1 sm:gap-2">
+              <div className="w-3 h-3 sm:w-4 sm:h-4 bg-white rounded-full border-2 border-gray-300"></div>
+              <span className="font-semibold text-xs sm:text-sm">Brancas</span>
               {whitePlayer.isPlayer && (
-                <span className="text-xs bg-accent-cyan text-dark-900 px-2 py-0.5 rounded">Você</span>
+                <span className="text-xs bg-accent-cyan text-dark-900 px-1.5 sm:px-2 py-0.5 rounded">Você</span>
               )}
             </div>
             {whitePlayer.isCurrent && gameState.gameStatus === 'playing' && (
-              <span className="text-xs text-accent-cyan">● Jogando</span>
+              <span className="text-xs text-accent-cyan">●</span>
             )}
           </div>
-          <p className="text-sm text-gray-300">{whitePlayer.nickname}</p>
+          <p className="text-xs sm:text-sm text-gray-300 truncate">{whitePlayer.nickname}</p>
           <p className="text-xs text-gray-400 mt-1">Peças: {countPieces('white')}</p>
         </div>
 
-        <div className={`p-3 rounded-lg border-2 ${
+        <div className={`p-2 sm:p-3 rounded-lg border-2 ${
           blackPlayer.isCurrent && gameState.gameStatus === 'playing'
             ? 'border-accent-cyan bg-accent-cyan/10' 
             : 'border-dark-600 bg-dark-700'
         }`}>
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-gray-900 rounded-full border-2 border-gray-700"></div>
-              <span className="font-semibold">Pretas</span>
+          <div className="flex items-center justify-between mb-1 sm:mb-2">
+            <div className="flex items-center gap-1 sm:gap-2">
+              <div className="w-3 h-3 sm:w-4 sm:h-4 bg-gray-900 rounded-full border-2 border-gray-700"></div>
+              <span className="font-semibold text-xs sm:text-sm">Pretas</span>
               {blackPlayer.isPlayer && (
-                <span className="text-xs bg-accent-cyan text-dark-900 px-2 py-0.5 rounded">Você</span>
+                <span className="text-xs bg-accent-cyan text-dark-900 px-1.5 sm:px-2 py-0.5 rounded">Você</span>
               )}
             </div>
             {blackPlayer.isCurrent && gameState.gameStatus === 'playing' && (
-              <span className="text-xs text-accent-cyan">● Jogando</span>
+              <span className="text-xs text-accent-cyan">●</span>
             )}
           </div>
-          <p className="text-sm text-gray-300">{blackPlayer.nickname}</p>
+          <p className="text-xs sm:text-sm text-gray-300 truncate">{blackPlayer.nickname}</p>
           <p className="text-xs text-gray-400 mt-1">Peças: {countPieces('black')}</p>
         </div>
       </div>
