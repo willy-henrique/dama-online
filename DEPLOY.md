@@ -83,6 +83,14 @@ Após o deploy do front-end, você precisa atualizar a variável `CLIENT_URL` no
 
 ## 🐛 Troubleshooting
 
+### Erro: "DEPLOYMENT_DELETED"
+Este erro ocorre quando um deployment foi removido. Veja o guia completo: **[SOLUCAO_DEPLOYMENT_DELETED.md](./SOLUCAO_DEPLOYMENT_DELETED.md)**
+
+**Solução rápida:**
+1. Crie um novo deployment no Vercel
+2. Ou restaure o deployment deletado (se foi há menos de 30 dias)
+3. Verifique as configurações do projeto
+
 ### Erro: "Cannot connect to server"
 - Verifique se `VITE_SERVER_URL` está configurada corretamente no Vercel
 - Verifique se o servidor está rodando (acesse a URL do servidor + `/health`)
