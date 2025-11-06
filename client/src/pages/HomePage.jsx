@@ -264,16 +264,16 @@ export default function HomePage({ socket, onCreateRoom, onJoinRoom, onBackToHom
               </button>
             </div>
           ) : mode === 'create' ? (
-            <form onSubmit={handleCreateRoom} className="space-y-4">
+            <form onSubmit={handleCreateRoom} className="space-y-3 sm:space-y-4">
               <button
                 type="button"
                 onClick={() => setMode(null)}
-                className="text-gray-400 hover:text-white mb-4"
+                className="text-gray-400 hover:text-white mb-2 sm:mb-4 text-sm sm:text-base flex items-center gap-1"
               >
                 ← Voltar
               </button>
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-2">
                   Seu Nickname
                 </label>
                 <input
@@ -281,28 +281,28 @@ export default function HomePage({ socket, onCreateRoom, onJoinRoom, onBackToHom
                   value={nickname}
                   onChange={(e) => setNickname(e.target.value)}
                   placeholder="Digite seu nome"
-                  className="w-full bg-dark-700 border border-dark-600 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-cyan"
+                  className="w-full bg-dark-700 border border-dark-600 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-cyan"
                   maxLength={20}
                 />
               </div>
               <button
                 type="submit"
-                className="w-full bg-accent-cyan text-dark-900 font-bold py-4 rounded-lg hover:bg-accent-cyan/80 transition"
+                className="w-full bg-accent-cyan text-dark-900 font-bold py-3 sm:py-4 rounded-lg hover:bg-accent-cyan/80 transition text-sm sm:text-base"
               >
                 Criar Sala
               </button>
             </form>
           ) : (
-            <form onSubmit={handleJoinRoom} className="space-y-4">
+            <form onSubmit={handleJoinRoom} className="space-y-3 sm:space-y-4">
               <button
                 type="button"
                 onClick={() => setMode(null)}
-                className="text-gray-400 hover:text-white mb-4"
+                className="text-gray-400 hover:text-white mb-2 sm:mb-4 text-sm sm:text-base flex items-center gap-1"
               >
                 ← Voltar
               </button>
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-2">
                   Seu Nickname
                 </label>
                 <input
@@ -310,12 +310,12 @@ export default function HomePage({ socket, onCreateRoom, onJoinRoom, onBackToHom
                   value={nickname}
                   onChange={(e) => setNickname(e.target.value)}
                   placeholder="Digite seu nome"
-                  className="w-full bg-dark-700 border border-dark-600 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-orange"
+                  className="w-full bg-dark-700 border border-dark-600 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-orange"
                   maxLength={20}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-2">
                   Código da Sala
                 </label>
                 <input
@@ -323,13 +323,13 @@ export default function HomePage({ socket, onCreateRoom, onJoinRoom, onBackToHom
                   value={roomId}
                   onChange={(e) => setRoomId(e.target.value.toUpperCase())}
                   placeholder="Digite o código"
-                  className="w-full bg-dark-700 border border-dark-600 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-orange text-center text-2xl font-bold tracking-wider"
+                  className="w-full bg-dark-700 border border-dark-600 rounded-lg px-3 sm:px-4 py-2 sm:py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent-orange text-center text-lg sm:text-2xl font-bold tracking-wider uppercase"
                   maxLength={6}
                 />
               </div>
               <button
                 type="submit"
-                className="w-full bg-accent-orange text-white font-bold py-4 rounded-lg hover:bg-accent-orange/80 transition"
+                className="w-full bg-accent-orange text-white font-bold py-3 sm:py-4 rounded-lg hover:bg-accent-orange/80 transition text-sm sm:text-base active:scale-95"
               >
                 Entrar na Sala
               </button>
