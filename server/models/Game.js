@@ -122,21 +122,70 @@ export default class Game {
         : [[1, -1], [1, 1]];
 
     for (const [dr, dc] of directions) {
-      const jumpRow = row + dr * 2;
-      const jumpCol = col + dc * 2;
-      const middleRow = row + dr;
-      const middleCol = col + dc;
+      if (piece.type === 'king') {
+        // Dama pode capturar em múltiplas casas de distância
+        let checkRow = row + dr;
+        let checkCol = col + dc;
+        let foundEnemy = false;
+        let enemyRow = -1;
+        let enemyCol = -1;
+        
+        // Procura por uma peça inimiga na direção
+        while (this.isValidPosition(checkRow, checkCol)) {
+          if (this.board[checkRow][checkCol] !== null) {
+            if (this.board[checkRow][checkCol].color === playerColor) {
+              // Encontrou peça própria, para a busca
+              break;
+            } else {
+              // Encontrou peça inimiga
+              foundEnemy = true;
+              enemyRow = checkRow;
+              enemyCol = checkCol;
+              break;
+            }
+          }
+          checkRow += dr;
+          checkCol += dc;
+        }
+        
+        // Se encontrou peça inimiga, verifica se pode pular sobre ela
+        if (foundEnemy) {
+          const jumpRow = enemyRow + dr;
+          const jumpCol = enemyCol + dc;
+          
+          // Continua procurando casas livres após a captura
+          let currentJumpRow = jumpRow;
+          let currentJumpCol = jumpCol;
+          
+          while (this.isValidPosition(currentJumpRow, currentJumpCol) && 
+                 this.board[currentJumpRow][currentJumpCol] === null) {
+            captures.push({
+              from: { row, col },
+              to: { row: currentJumpRow, col: currentJumpCol },
+              captured: { row: enemyRow, col: enemyCol }
+            });
+            currentJumpRow += dr;
+            currentJumpCol += dc;
+          }
+        }
+      } else {
+        // Peça normal só captura pulando uma casa
+        const jumpRow = row + dr * 2;
+        const jumpCol = col + dc * 2;
+        const middleRow = row + dr;
+        const middleCol = col + dc;
 
-      if (this.isValidPosition(jumpRow, jumpCol) && 
-          this.board[jumpRow][jumpCol] === null &&
-          this.isValidPosition(middleRow, middleCol) &&
-          this.board[middleRow][middleCol] !== null &&
-          this.board[middleRow][middleCol].color !== playerColor) {
-        captures.push({
-          from: { row, col },
-          to: { row: jumpRow, col: jumpCol },
-          captured: { row: middleRow, col: middleCol }
-        });
+        if (this.isValidPosition(jumpRow, jumpCol) && 
+            this.board[jumpRow][jumpCol] === null &&
+            this.isValidPosition(middleRow, middleCol) &&
+            this.board[middleRow][middleCol] !== null &&
+            this.board[middleRow][middleCol].color !== playerColor) {
+          captures.push({
+            from: { row, col },
+            to: { row: jumpRow, col: jumpCol },
+            captured: { row: middleRow, col: middleCol }
+          });
+        }
       }
     }
 
@@ -158,15 +207,31 @@ export default class Game {
         : [[1, -1], [1, 1]];
 
     for (const [dr, dc] of directions) {
-      const newRow = row + dr;
-      const newCol = col + dc;
+      if (piece.type === 'king') {
+        // Dama pode se mover múltiplas casas em qualquer diagonal
+        let newRow = row + dr;
+        let newCol = col + dc;
+        
+        while (this.isValidPosition(newRow, newCol) && this.board[newRow][newCol] === null) {
+          moves.push({
+            from: { row, col },
+            to: { row: newRow, col: newCol }
+          });
+          newRow += dr;
+          newCol += dc;
+        }
+      } else {
+        // Peça normal só se move uma casa
+        const newRow = row + dr;
+        const newCol = col + dc;
 
-      if (this.isValidPosition(newRow, newCol) && 
-          this.board[newRow][newCol] === null) {
-        moves.push({
-          from: { row, col },
-          to: { row: newRow, col: newCol }
-        });
+        if (this.isValidPosition(newRow, newCol) && 
+            this.board[newRow][newCol] === null) {
+          moves.push({
+            from: { row, col },
+            to: { row: newRow, col: newCol }
+          });
+        }
       }
     }
 
@@ -190,24 +255,78 @@ export default class Game {
 
     // Verifica se há capturas obrigatórias
     const possibleCaptures = this.getPossibleCaptures(playerColor);
-    const isCapture = Math.abs(to.row - from.row) === 2 && Math.abs(to.col - from.col) === 2;
+    
+    // Verifica se é uma captura (movimento diagonal de mais de 1 casa ou exatamente 2 casas)
+    const rowDiff = Math.abs(to.row - from.row);
+    const colDiff = Math.abs(to.col - from.col);
+    const isCapture = (piece.type === 'king' && rowDiff >= 2 && rowDiff === colDiff) ||
+                      (piece.type === 'pawn' && rowDiff === 2 && colDiff === 2);
 
     if (possibleCaptures.length > 0 && !isCapture) {
-      return { valid: false, error: 'Captura obrigatória' };
+      // Verifica se o movimento está na lista de capturas válidas
+      const isValidCapture = possibleCaptures.some(capture => 
+        capture.from.row === from.row && 
+        capture.from.col === from.col &&
+        capture.to.row === to.row && 
+        capture.to.col === to.col
+      );
+      
+      if (!isValidCapture) {
+        return { valid: false, error: 'Captura obrigatória' };
+      }
     }
 
     // Valida movimento de captura
     if (isCapture) {
-      const middleRow = (from.row + to.row) / 2;
-      const middleCol = (from.col + to.col) / 2;
-      const middlePiece = this.board[middleRow][middleCol];
-
-      if (!middlePiece || middlePiece.color === playerColor) {
+      // Para damas, encontra a peça capturada no caminho
+      let capturedRow = -1;
+      let capturedCol = -1;
+      let foundEnemy = false;
+      
+      const rowStep = to.row > from.row ? 1 : -1;
+      const colStep = to.col > from.col ? 1 : -1;
+      let checkRow = from.row + rowStep;
+      let checkCol = from.col + colStep;
+      
+      // Procura pela peça inimiga no caminho
+      while (checkRow !== to.row && checkCol !== to.col) {
+        if (this.board[checkRow][checkCol] !== null) {
+          if (this.board[checkRow][checkCol].color === playerColor) {
+            return { valid: false, error: 'Não pode capturar peça própria' };
+          } else {
+            if (foundEnemy) {
+              return { valid: false, error: 'Só pode capturar uma peça por vez' };
+            }
+            foundEnemy = true;
+            capturedRow = checkRow;
+            capturedCol = checkCol;
+          }
+        }
+        checkRow += rowStep;
+        checkCol += colStep;
+      }
+      
+      // Verifica se a captura é válida
+      if (!foundEnemy) {
+        return { valid: false, error: 'Captura inválida - nenhuma peça no caminho' };
+      }
+      
+      // Verifica se o movimento está na lista de capturas válidas
+      const isValidCaptureMove = possibleCaptures.some(capture => 
+        capture.from.row === from.row && 
+        capture.from.col === from.col &&
+        capture.to.row === to.row && 
+        capture.to.col === to.col &&
+        capture.captured.row === capturedRow &&
+        capture.captured.col === capturedCol
+      );
+      
+      if (possibleCaptures.length > 0 && !isValidCaptureMove) {
         return { valid: false, error: 'Captura inválida' };
       }
 
       // Executa captura
-      this.board[middleRow][middleCol] = null;
+      this.board[capturedRow][capturedCol] = null;
       this.board[to.row][to.col] = piece;
       this.board[from.row][from.col] = null;
 
@@ -217,29 +336,43 @@ export default class Game {
       // Verifica se há mais capturas possíveis
       const moreCaptures = this.getCapturesForPiece(to.row, to.col, playerColor);
       if (moreCaptures.length > 0) {
-        this.lastMove = { from, to, captured: { row: middleRow, col: middleCol } };
-        return { valid: true, mustContinue: true, captured: { row: middleRow, col: middleCol } };
+        this.lastMove = { from, to, captured: { row: capturedRow, col: capturedCol } };
+        return { valid: true, mustContinue: true, captured: { row: capturedRow, col: capturedCol } };
       }
 
       // Troca de turno
       this.currentPlayer = playerColor === 'white' ? 'black' : 'white';
-      this.lastMove = { from, to, captured: { row: middleRow, col: middleCol } };
-      return { valid: true, captured: { row: middleRow, col: middleCol } };
+      this.lastMove = { from, to, captured: { row: capturedRow, col: capturedCol } };
+      return { valid: true, captured: { row: capturedRow, col: capturedCol } };
     }
 
     // Valida movimento simples
-    const rowDiff = to.row - from.row;
-    const colDiff = Math.abs(to.col - from.col);
+    const simpleRowDiff = to.row - from.row;
+    const simpleColDiff = to.col - from.col;
 
     if (piece.type === 'pawn') {
-      const validDirection = playerColor === 'white' ? rowDiff === -1 : rowDiff === 1;
-      if (!validDirection || colDiff !== 1) {
+      const validDirection = playerColor === 'white' ? simpleRowDiff === -1 : simpleRowDiff === 1;
+      if (!validDirection || Math.abs(simpleColDiff) !== 1) {
         return { valid: false, error: 'Movimento inválido' };
       }
     } else {
-      // Dama pode se mover em qualquer diagonal
-      if (Math.abs(rowDiff) !== Math.abs(colDiff)) {
+      // Dama pode se mover em qualquer diagonal (múltiplas casas)
+      if (Math.abs(simpleRowDiff) !== Math.abs(simpleColDiff)) {
         return { valid: false, error: 'Movimento inválido' };
+      }
+      
+      // Verifica se o caminho está livre
+      const rowStep = simpleRowDiff > 0 ? 1 : -1;
+      const colStep = simpleColDiff > 0 ? 1 : -1;
+      let checkRow = from.row + rowStep;
+      let checkCol = from.col + colStep;
+      
+      while (checkRow !== to.row && checkCol !== to.col) {
+        if (this.board[checkRow][checkCol] !== null) {
+          return { valid: false, error: 'Caminho bloqueado' };
+        }
+        checkRow += rowStep;
+        checkCol += colStep;
       }
     }
 

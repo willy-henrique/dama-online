@@ -9,6 +9,7 @@ export const useGameStore = create((set, get) => ({
   roomId: null,
   gameStatus: 'waiting', // 'waiting', 'playing', 'finished'
   winner: null,
+  lastMove: null, // Último movimento realizado
   
   // Estado da UI
   selected: null,
@@ -50,6 +51,7 @@ export const useGameStore = create((set, get) => ({
     roomId: null,
     gameStatus: 'waiting',
     winner: null,
+    lastMove: null,
     selected: null,
     legalMoves: [],
     mustContinueCapture: null,

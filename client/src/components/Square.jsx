@@ -8,6 +8,9 @@ export default function Square({
   isSelected, 
   isHighlighted, 
   isValidMove, 
+  isLastMove,
+  isLastMoveFrom,
+  isLastMoveTo,
   canMove,
   onClick 
 }) {
@@ -38,6 +41,15 @@ export default function Square({
   const highlightedClasses = isHighlighted
     ? 'ring-1 sm:ring-2 ring-accent-orange'
     : '';
+  
+  // Destaque para o último movimento do oponente
+  const lastMoveClasses = isLastMove
+    ? isLastMoveFrom
+      ? 'ring-2 sm:ring-3 ring-blue-400 ring-offset-1 bg-blue-500/20'
+      : isLastMoveTo
+      ? 'ring-2 sm:ring-3 ring-green-400 ring-offset-1 bg-green-500/20'
+      : ''
+    : '';
 
   return (
     <div
@@ -46,6 +58,7 @@ export default function Square({
         ${colorClasses}
         ${selectedClasses}
         ${highlightedClasses}
+        ${lastMoveClasses}
         ${interactiveClasses}
       `}
       onClick={onClick}
@@ -59,6 +72,17 @@ export default function Square({
       {/* Indicador de movimento válido */}
       {isValidMove && !piece && (
         <div className="absolute w-2 h-2 sm:w-3 sm:h-3 bg-accent-orange rounded-full animate-pulse"></div>
+      )}
+      {/* Indicador visual do último movimento */}
+      {isLastMoveFrom && !piece && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="w-3 h-3 sm:w-4 sm:h-4 border-2 border-blue-400 rounded-full animate-pulse"></div>
+        </div>
+      )}
+      {isLastMoveTo && !piece && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="w-3 h-3 sm:w-4 sm:h-4 border-2 border-green-400 rounded-full animate-pulse"></div>
+        </div>
       )}
     </div>
   );

@@ -19,6 +19,7 @@ export default function Board() {
     legalMoves,
     mustContinueCapture,
     gameStatus,
+    lastMove,
     setSelected,
     setLegalMoves,
     clearSelection
@@ -104,6 +105,13 @@ export default function Board() {
               const isSelectedCell = selected && selected.row === row && selected.col === col;
               const isValidMoveCell = isValidMoveHelper(row, col, legalMoves);
               
+              // Verifica se esta célula faz parte do último movimento do oponente
+              // Só mostra quando é meu turno (ou seja, o último movimento foi do oponente)
+              const isOpponentMove = lastMove && turn === myColor;
+              const isLastMoveFrom = isOpponentMove && lastMove.from.row === row && lastMove.from.col === col;
+              const isLastMoveTo = isOpponentMove && lastMove.to.row === row && lastMove.to.col === col;
+              const isLastMove = isLastMoveFrom || isLastMoveTo;
+              
               return (
                 <Square
                   key={`${displayRow}-${displayCol}`}
@@ -113,6 +121,9 @@ export default function Board() {
                   isSelected={isSelectedCell}
                   isHighlighted={isValidMoveCell}
                   isValidMove={isValidMoveCell}
+                  isLastMove={isLastMove}
+                  isLastMoveFrom={isLastMoveFrom}
+                  isLastMoveTo={isLastMoveTo}
                   canMove={canMove}
                   onClick={() => handleSquareClick(displayRow, displayCol)}
                 />

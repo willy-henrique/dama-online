@@ -204,6 +204,7 @@ export default function GamePage({ socket, gameData, onBackToHome }) {
               winner={gameState.winner}
               onMove={handleMove}
               mustContinueCapture={mustContinueCapture}
+              lastMove={gameState.lastMove}
             />
           </div>
 

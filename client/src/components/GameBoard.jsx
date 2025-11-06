@@ -8,7 +8,8 @@ export default function GameBoard({
   gameStatus,
   winner,
   onMove,
-  mustContinueCapture 
+  mustContinueCapture,
+  lastMove 
 }) {
   const [selectedPiece, setSelectedPiece] = useState(null);
   const [validMoves, setValidMoves] = useState([]);
@@ -170,6 +171,13 @@ export default function GameBoard({
               const isHighlighted = isCellHighlighted(actualRow, actualCol);
               const isSelected = isCellSelected(actualRow, actualCol);
               const canMove = currentPlayer === playerColor && gameStatus === 'playing';
+              
+              // Verifica se esta célula faz parte do último movimento do oponente
+              // Só mostra quando é meu turno (ou seja, o último movimento foi do oponente)
+              const isOpponentMove = lastMove && currentPlayer === playerColor;
+              const isLastMoveFrom = isOpponentMove && lastMove.from.row === actualRow && lastMove.from.col === actualCol;
+              const isLastMoveTo = isOpponentMove && lastMove.to.row === actualRow && lastMove.to.col === actualCol;
+              const isLastMove = isLastMoveFrom || isLastMoveTo;
 
               return (
                 <div
@@ -180,6 +188,8 @@ export default function GameBoard({
                     ${cellColor}
                     ${isSelected ? 'ring-2 sm:ring-4 ring-accent-cyan' : ''}
                     ${isHighlighted ? 'ring-1 sm:ring-2 ring-accent-orange' : ''}
+                    ${isLastMoveFrom ? 'ring-2 sm:ring-3 ring-blue-400 bg-blue-500/20' : ''}
+                    ${isLastMoveTo ? 'ring-2 sm:ring-3 ring-green-400 bg-green-500/20' : ''}
                     ${canMove && cell && cell.color === playerColor ? 'cursor-pointer hover:opacity-80 active:scale-95' : ''}
                     ${canMove && isHighlighted ? 'cursor-pointer hover:bg-accent-orange/30' : ''}
                     ${!canMove ? 'cursor-not-allowed opacity-50' : ''}
@@ -193,6 +203,17 @@ export default function GameBoard({
                   {cell && renderPiece(cell)}
                   {isHighlighted && !cell && (
                     <div className="absolute w-2 h-2 sm:w-3 sm:h-3 bg-accent-orange rounded-full"></div>
+                  )}
+                  {/* Indicador do último movimento */}
+                  {isLastMoveFrom && !cell && (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="w-3 h-3 sm:w-4 sm:h-4 border-2 border-blue-400 rounded-full animate-pulse"></div>
+                    </div>
+                  )}
+                  {isLastMoveTo && !cell && (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="w-3 h-3 sm:w-4 sm:h-4 border-2 border-green-400 rounded-full animate-pulse"></div>
+                    </div>
                   )}
                 </div>
               );

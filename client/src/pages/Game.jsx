@@ -104,6 +104,7 @@ export default function Game({ onBackToHome }) {
         turn: state.currentPlayer,
         gameStatus: state.gameStatus,
         winner: state.winner,
+        lastMove: state.lastMove,
         myColor: playerColor,
         opponentColor,
         myNickname: state.players[playerColor]?.nickname || '',

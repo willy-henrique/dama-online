@@ -36,21 +36,70 @@ export function getCapturesForPiece(board, row, col, playerColor) {
       : [[1, -1], [1, 1]];
 
   for (const [dr, dc] of directions) {
-    const jumpRow = row + dr * 2;
-    const jumpCol = col + dc * 2;
-    const middleRow = row + dr;
-    const middleCol = col + dc;
+    if (piece.type === 'king') {
+      // Dama pode capturar em múltiplas casas de distância
+      let checkRow = row + dr;
+      let checkCol = col + dc;
+      let foundEnemy = false;
+      let enemyRow = -1;
+      let enemyCol = -1;
+      
+      // Procura por uma peça inimiga na direção
+      while (isValidPosition(checkRow, checkCol)) {
+        if (board[checkRow][checkCol] !== null) {
+          if (board[checkRow][checkCol].color === playerColor) {
+            // Encontrou peça própria, para a busca
+            break;
+          } else {
+            // Encontrou peça inimiga
+            foundEnemy = true;
+            enemyRow = checkRow;
+            enemyCol = checkCol;
+            break;
+          }
+        }
+        checkRow += dr;
+        checkCol += dc;
+      }
+      
+      // Se encontrou peça inimiga, verifica se pode pular sobre ela
+      if (foundEnemy) {
+        const jumpRow = enemyRow + dr;
+        const jumpCol = enemyCol + dc;
+        
+        // Continua procurando casas livres após a captura
+        let currentJumpRow = jumpRow;
+        let currentJumpCol = jumpCol;
+        
+        while (isValidPosition(currentJumpRow, currentJumpCol) && 
+               board[currentJumpRow][currentJumpCol] === null) {
+          captures.push({
+            from: { row, col },
+            to: { row: currentJumpRow, col: currentJumpCol },
+            captured: { row: enemyRow, col: enemyCol }
+          });
+          currentJumpRow += dr;
+          currentJumpCol += dc;
+        }
+      }
+    } else {
+      // Peça normal só captura pulando uma casa
+      const jumpRow = row + dr * 2;
+      const jumpCol = col + dc * 2;
+      const middleRow = row + dr;
+      const middleCol = col + dc;
 
-    if (isValidPosition(jumpRow, jumpCol) && 
-        board[jumpRow][jumpCol] === null &&
-        isValidPosition(middleRow, middleCol) &&
-        board[middleRow][middleCol] !== null &&
-        board[middleRow][middleCol].color !== playerColor) {
-      captures.push({
-        from: { row, col },
-        to: { row: jumpRow, col: jumpCol },
-        captured: { row: middleRow, col: middleCol }
-      });
+      if (isValidPosition(jumpRow, jumpCol) && 
+          board[jumpRow][jumpCol] === null &&
+          isValidPosition(middleRow, middleCol) &&
+          board[middleRow][middleCol] !== null &&
+          board[middleRow][middleCol].color !== playerColor) {
+        captures.push({
+          from: { row, col },
+          to: { row: jumpRow, col: jumpCol },
+          captured: { row: middleRow, col: middleCol }
+        });
+      }
     }
   }
 
@@ -72,15 +121,31 @@ export function getSimpleMovesForPiece(board, row, col, playerColor) {
       : [[1, -1], [1, 1]];
 
   for (const [dr, dc] of directions) {
-    const newRow = row + dr;
-    const newCol = col + dc;
+    if (piece.type === 'king') {
+      // Dama pode se mover múltiplas casas em qualquer diagonal
+      let newRow = row + dr;
+      let newCol = col + dc;
+      
+      while (isValidPosition(newRow, newCol) && board[newRow][newCol] === null) {
+        moves.push({
+          from: { row, col },
+          to: { row: newRow, col: newCol }
+        });
+        newRow += dr;
+        newCol += dc;
+      }
+    } else {
+      // Peça normal só se move uma casa
+      const newRow = row + dr;
+      const newCol = col + dc;
 
-    if (isValidPosition(newRow, newCol) && 
-        board[newRow][newCol] === null) {
-      moves.push({
-        from: { row, col },
-        to: { row: newRow, col: newCol }
-      });
+      if (isValidPosition(newRow, newCol) && 
+          board[newRow][newCol] === null) {
+        moves.push({
+          from: { row, col },
+          to: { row: newRow, col: newCol }
+        });
+      }
     }
   }
 
