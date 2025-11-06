@@ -145,7 +145,19 @@ export default function GamePage({ socket, gameData, onBackToHome }) {
   }, [socket, gameData]);
 
   const handleMove = (from, to) => {
-    if (!socket || !gameData?.roomId) return;
+    if (!socket || !gameData?.roomId) {
+      console.error('❌ Não é possível fazer movimento:', { socket: !!socket, roomId: gameData?.roomId });
+      setError('Erro: não conectado à sala');
+      return;
+    }
+    
+    if (!playerColor) {
+      console.error('❌ Cor do jogador não definida');
+      setError('Erro: cor do jogador não identificada');
+      return;
+    }
+    
+    console.log('📤 Enviando movimento:', { from, to, playerColor, roomId: gameData.roomId });
     socket.emit('make-move', { from, to });
   };
 
@@ -154,12 +166,14 @@ export default function GamePage({ socket, gameData, onBackToHome }) {
     socket.emit('reset-game');
   };
 
-  if (!gameState) {
+  if (!gameState || !gameState.board) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center p-4">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent-cyan mx-auto mb-4"></div>
-          <p className="text-gray-400">Aguardando outro jogador...</p>
+          <p className="text-gray-400">Carregando jogo...</p>
+          {!socket && <p className="text-red-400 text-sm mt-2">Aguardando conexão...</p>}
+          {socket && !gameData && <p className="text-red-400 text-sm mt-2">Aguardando dados do jogo...</p>}
         </div>
       </div>
     );
