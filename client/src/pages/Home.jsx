@@ -26,13 +26,17 @@ export default function Home({ onStartGame }) {
     socket.on('room-created', ({ roomId }) => {
       console.log('✅ Sala criada! Room ID:', roomId);
       setCreatedRoomId(roomId);
+      setWaitingForPlayer(true);
       setStatus('Aguardando outro jogador...');
     });
 
     socket.on('room-joined', ({ roomId, color, nickname }) => {
       console.log('✅ Entrou na sala! Room:', roomId, 'Color:', color);
+      setJoinedRoomId(roomId);
       setState({ roomId, myColor: color, myNickname: nickname });
-      setStatus('Jogador conectado!');
+      setWaitingForPlayer(true);
+      setStatus('Aguardando outro jogador...');
+      // Não vai para o jogo ainda, espera o game-started
     });
 
     socket.on('game-started', (gameState) => {
@@ -44,7 +48,7 @@ export default function Home({ onStartGame }) {
       if (playerColor) {
         const opponentColor = playerColor === 'white' ? 'black' : 'white';
         setState({
-          roomId: gameState.roomId || createdRoomId || roomId,
+          roomId: gameState.roomId || createdRoomId || joinedRoomId,
           myColor: playerColor,
           opponentColor,
           myNickname: gameState.players[playerColor]?.nickname || nickname,
@@ -55,7 +59,13 @@ export default function Home({ onStartGame }) {
           socket
         });
         
-        onStartGame();
+        setWaitingForPlayer(false);
+        setStatus('Iniciando jogo...');
+        
+        // Pequeno delay para mostrar "Iniciando jogo..."
+        setTimeout(() => {
+          onStartGame();
+        }, 500);
       }
     });
 
@@ -116,14 +126,7 @@ export default function Home({ onStartGame }) {
 
   const copyRoomId = () => {
     navigator.clipboard.writeText(createdRoomId);
-    const button = document.activeElement;
-    const originalText = button.textContent;
-    button.textContent = '✓ Copiado!';
-    button.classList.add('bg-green-500');
-    setTimeout(() => {
-      button.textContent = originalText;
-      button.classList.remove('bg-green-500');
-    }, 2000);
+    // Apenas copia, sem feedback visual
   };
 
   const shareRoomId = async () => {
